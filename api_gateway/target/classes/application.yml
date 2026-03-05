@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api_gateway
+
+  cloud:
+    gateway:
+      routes:
+        # Ruta para Auth Service
+        - id: auth-service
+          uri: http://api_auth:8082
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=0
+
+        # Ruta para Pedidos Service
+        - id: pedidos-service
+          uri: http://api_pedidos:8083
+          predicates:
+            - Path=/api/pedidos/**
+          filters:
+            - StripPrefix=0
+
+        # Ruta para Catalogo Service
+        - id: catalogo-service
+          uri: http://api_catalogo:8081
+          predicates:
+            - Path=/api/catalogo/**
+          filters:
+            - StripPrefix=0
+
+      # Configuración global (CORS, timeouts)
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+
+# JWT config (si quieres validar en el gateway)
+jwt:
+  secret: ${JWT_SECRET:miSecretoSuperSeguroParaJWT2024DebeSerMuyLargoPorSeguridad}

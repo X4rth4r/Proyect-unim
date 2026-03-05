@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:alpine3.22
+    container_name: pedidos_db
+    environment:
+      POSTGRES_DB: pedidos_db
+      POSTGRES_USER: pedidos_user
+      POSTGRES_PASSWORD: pedidos_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pedidos_user -d pedidos_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    container_name: api_pedidos
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/pedidos_db
+      SPRING_DATASOURCE_USERNAME: pedidos_user
+      SPRING_DATASOURCE_PASSWORD: pedidos_pass
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+
+volumes:
+  pgdata:

@@ -1,0 +1,14 @@
+  api_gateway:
+    build: ./api_gateway
+    container_name: api_gateway
+    environment:
+      JWT_SECRET: miSecretoSuperSeguroParaJWT2024DebeSerMuyLargoPorSeguridad
+      SPRING_MAIN_CLOUD_PLATFORM: none
+      VCAP_APPLICATION: ""
+      VCAP_SERVICES: ""
+    depends_on:
+      - api_auth
+      - api_pedidos
+      - api_catalogo
+    ports:
+      - "8080:8080"

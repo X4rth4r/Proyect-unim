@@ -1,0 +1,80 @@
+databaseChangeLog:
+  
+  - changeSet:
+      id: 001-create-usuarios
+      author: api_auth
+      changes:
+        - createTable:
+            tableName: usuarios
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password_hash
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: roles
+                  type: VARCHAR(200)
+                  defaultValue: "USER"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: activo
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: creado_en
+                  type: TIMESTAMP
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+
+  # Usuario de prueba (password: "admin123" - BCrypt hash)
+  - changeSet:
+      id: 002-insert-admin
+      author: api_auth
+      changes:
+        - insert:
+            tableName: usuarios
+            columns:
+              - column:
+                  name: username
+                  value: "admin"
+              - column:
+                  name: password_hash
+                  value: "$2a$12$Ycatrhu.nx8oQIcghEpdAehKrF8mu3O.jcUXfOg9Sop.eDyIXSjX2"  # admin123
+              - column:
+                  name: roles
+                  value: "ADMIN,USER"
+
+  - changeSet:
+      id: 003-insert-user-only
+      author: api_auth
+      changes:
+        - insert:
+            tableName: usuarios
+            columns:
+              - column:
+                  name: username
+                  value: "user1"
+              - column:
+                  name: password_hash
+                  value: "$2a$12$Ycatrhu.nx8oQIcghEpdAehKrF8mu3O.jcUXfOg9Sop.eDyIXSjX2"  # admin123
+              - column:
+                  name: roles
+                  value: "USER"

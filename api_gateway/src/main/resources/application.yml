@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api_gateway
+  main:
+    cloud-platform: none
+
+jwt:
+  secret: ${JWT_SECRET:miSecretoSuperSeguroParaJWT2024DebeSerMuyLargoPorSeguridad}

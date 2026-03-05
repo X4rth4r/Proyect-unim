@@ -1,0 +1,205 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-clientes
+      author: juan
+      changes:
+        - createTable:
+            tableName: clientes
+            columns:
+              - column:
+                  name: id_cliente
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: nombre
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: correo
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: telefono
+                  type: VARCHAR(20)
+              - column:
+                  name: direccion
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 002-create-estado
+      author: juan
+      changes:
+        - createTable:
+            tableName: estado
+            columns:
+              - column:
+                  name: id_estado
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: nombre_estado
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: descripcion
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 003-create-pedidos
+      author: juan
+      changes:
+        - createTable:
+            tableName: pedidos
+            columns:
+              - column:
+                  name: id_pedido
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: id_cliente
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: direccion_envio
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cantidad
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: id_estado
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fecha_pedido
+                  type: DATETIME
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: fecha_actualizacion
+                  type: DATETIME
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+        - addForeignKeyConstraint:
+            baseTableName: pedidos
+            baseColumnNames: id_cliente
+            referencedTableName: clientes
+            referencedColumnNames: id_cliente
+            constraintName: fk_pedidos_cliente
+
+        - addForeignKeyConstraint:
+            baseTableName: pedidos
+            baseColumnNames: id_estado
+            referencedTableName: estado
+            referencedColumnNames: id_estado
+            constraintName: fk_pedidos_estado
+
+  - changeSet:
+      id: 004-create-detalle-pedido
+      author: juan
+      changes:
+        - createTable:
+            tableName: detalle_pedido
+            columns:
+              - column:
+                  name: id_detalle
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: pedido_unitario
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: id_pedido
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: id_producto
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cantidad
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subtotal
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: detalle_pedido
+            baseColumnNames: id_pedido
+            referencedTableName: pedidos
+            referencedColumnNames: id_pedido
+            constraintName: fk_detalle_pedido
+
+  - changeSet:
+      id: 005-create-historial-estado
+      author: juan
+      changes:
+        - createTable:
+            tableName: historial_estado
+            columns:
+              - column:
+                  name: id_historial
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: id_pedido
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comentario
+                  type: VARCHAR(255)
+              - column:
+                  name: fecha_cambio
+                  type: DATETIME
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: id_estado
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: historial_estado
+            baseColumnNames: id_pedido
+            referencedTableName: pedidos
+            referencedColumnNames: id_pedido
+            constraintName: fk_historial_pedido
+
+        - addForeignKeyConstraint:
+            baseTableName: historial_estado
+            baseColumnNames: id_estado
+            referencedTableName: estado
+            referencedColumnNames: id_estado
+            constraintName: fk_historial_estado

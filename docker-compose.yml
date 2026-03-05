@@ -1,0 +1,127 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  db-pedidos:
+    image: postgres:alpine3.22
+    container_name: pedidos_db
+    environment:
+      POSTGRES_DB: pedidos_db
+      POSTGRES_USER: pedidos_user
+      POSTGRES_PASSWORD: pedidos_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_pedidos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pedidos_user -d pedidos_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api-pedidos:
+    build: ./api_pedidos
+    container_name: api_pedidos
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-pedidos:5432/pedidos_db
+      SPRING_DATASOURCE_USERNAME: pedidos_user
+      SPRING_DATASOURCE_PASSWORD: pedidos_pass
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+    depends_on:
+      db-pedidos:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
+  db-catalogo:
+    image: postgres:alpine3.22
+    container_name: catalogo_db
+    environment:
+      POSTGRES_DB: catalogo_db
+      POSTGRES_USER: catalogo_user
+      POSTGRES_PASSWORD: catalogo_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_catalogo:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catalogo_user -d catalogo_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api-catalogo:
+    build: ./api_catalogo
+    container_name: api_catalogo
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-catalogo:5432/catalogo_db
+      SPRING_DATASOURCE_USERNAME: catalogo_user
+      SPRING_DATASOURCE_PASSWORD: catalogo_pass
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+    depends_on:
+      db-catalogo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
+  db-auth:
+    image: postgres:alpine3.22
+    container_name: auth_db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata_auth:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api-auth:
+    build: ./api_auth
+    container_name: api_auth
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-auth:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: auth_user
+      SPRING_DATASOURCE_PASSWORD: auth_pass
+      JWT_SECRET: miSecretoSuperSeguroParaJWT2024DebeSerMuyLargoPorSeguridad
+    depends_on:
+      db-auth:
+        condition: service_healthy
+
+  api-gateway:
+    build: ./api_gateway
+    container_name: api_gateway
+    environment:
+      JWT_SECRET: miSecretoSuperSeguroParaJWT2024DebeSerMuyLargoPorSeguridad
+    depends_on:
+      - api-auth
+      - api-pedidos
+      - api-catalogo
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata_pedidos:
+  pgdata_catalogo:
+  pgdata_auth:
+  rabbitmq_data:

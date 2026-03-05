@@ -10,6 +10,8 @@ public class RabbitMQConfig {
     public static final String EXCHANGE = "pedidos.exchange";
     public static final String QUEUE_PEDIDO_CREADO = "pedido.creado.queue";
     public static final String ROUTING_KEY_PEDIDO_CREADO = "pedido.creado";
+    public static final String QUEUE_PEDIDO_CANCELADO = "pedido.cancelado.queue";
+    public static final String ROUTING_KEY_PEDIDO_CANCELADO = "pedido.cancelado";
 
     @Bean
     public TopicExchange exchange() {
@@ -27,5 +29,18 @@ public class RabbitMQConfig {
                 .bind(queuePedidoCreado())
                 .to(exchange())
                 .with(ROUTING_KEY_PEDIDO_CREADO);
+    }
+
+    @Bean
+    public Queue queuePedidoCancelado() {
+        return new Queue(QUEUE_PEDIDO_CANCELADO, true);
+    }
+
+    @Bean
+    public Binding bindingPedidoCancelado() {
+        return BindingBuilder
+                .bind(queuePedidoCancelado())
+                .to(exchange())
+                .with(ROUTING_KEY_PEDIDO_CANCELADO);
     }
 }

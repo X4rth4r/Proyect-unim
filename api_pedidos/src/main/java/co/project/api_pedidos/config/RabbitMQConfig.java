@@ -10,6 +10,7 @@ public class RabbitMQConfig {
     public static final String EXCHANGE = "pedidos.exchange";
     public static final String QUEUE_PEDIDO_CREADO = "pedido.creado.queue";
     public static final String ROUTING_KEY_PEDIDO_CREADO = "pedido.creado";
+    public static final String ROUTING_KEY_PEDIDO_CANCELADO = "pedido.cancelado";
 
     @Bean
     public TopicExchange exchange() {
